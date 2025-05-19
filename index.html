@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Определитель музыкального темпа</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center">BPM Estimator</h1>
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-2" for="audioFile">Загрузите аудио-файл</label>
+            <input type="file" id="audioFile" accept="audio/*" class="w-full p-2 border rounded">
+        </div>
+        <button onclick="uploadFile()" class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Определить
+ BPM</button>
+        <div id="result" class="mt-4 text-center"></div>
+    </div>
+
+    <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('audioFile');
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Processing...';
+
+            if (!fileInput.files[0]) {
+                resultDiv.innerHTML = '<span class="text-red-500">Please select a file</span>';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<span class="text-red-500">${data.error}</span>`;
+                } else {
+                    resultDiv.innerHTML = `<span class="text-green-500">Estimated BPM: ${data.bpm}</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="text-red-500">An error occurred</span>';
+            }
+        }
+    </script>
+</body>
+</html>
